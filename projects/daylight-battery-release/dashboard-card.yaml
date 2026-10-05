@@ -1,0 +1,40 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    content: |
+      **Daytime battery release:** {{ states('input_number.daytime_battery_release_allowance') | float(0) | round(0) }} kWh
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: Down 1 kWh
+        icon: mdi:minus
+        tap_action:
+          action: call-service
+          service: input_number.decrement
+          target:
+            entity_id: input_number.daytime_battery_release_allowance
+      - type: button
+        name: Up 1 kWh
+        icon: mdi:plus
+        tap_action:
+          action: call-service
+          service: input_number.increment
+          target:
+            entity_id: input_number.daytime_battery_release_allowance
+  - type: entities
+    entities:
+      - entity: input_boolean.daytime_battery_release_active
+        name: Release active
+      - type: button
+        name: Start release
+        icon: mdi:battery-arrow-down
+        tap_action:
+          action: call-service
+          service: script.daytime_battery_release_start
+      - type: button
+        name: Stop release
+        icon: mdi:stop-circle-outline
+        tap_action:
+          action: call-service
+          service: script.daytime_battery_release_stop
+

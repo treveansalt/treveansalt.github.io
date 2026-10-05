@@ -1,0 +1,54 @@
+# Daylight Battery Release for Home Assistant
+#
+# Adapt the entity IDs and REST command names below to your installation.
+# The amount is in kWh and is deliberately limited to the configured battery
+# capacity. The scripts are kept separate so they can also be called by an
+# automation or a voice assistant.
+
+input_number:
+  daytime_battery_release_allowance:
+    name: Daytime battery release allowance
+    min: 0
+    max: 16
+    step: 1
+    mode: slider
+    unit_of_measurement: kWh
+
+input_boolean:
+  daytime_battery_release_active:
+    name: Daytime battery release active
+
+rest_command:
+  # Map these to SolisAgileManager's HTTP API in your secrets/config.
+  solismanager_discharge_battery:
+    url: "http://SOLISMANAGER_HOST:5169/api/inverter/dischargebattery"
+    method: get
+  solismanager_clear_overrides:
+    url: "http://SOLISMANAGER_HOST:5169/api/inverter/clearoverrides"
+    method: get
+
+script:
+  daytime_battery_release_start:
+    alias: Start daytime battery release
+    mode: single
+    sequence:
+      # SolisAgileManager applies the manual discharge override. The selected
+      # allowance is retained in the helper for display and future extensions.
+      - service: rest_command.solismanager_discharge_battery
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.daytime_battery_release_active
+
+  daytime_battery_release_stop:
+    alias: Stop daytime battery release
+    mode: single
+    sequence:
+      # Clearing overrides returns control to the Octopus/SolisAgileManager
+      # schedule. Continue if the service is temporarily unreachable so the UI
+      # still reflects that the local release request has been stopped.
+      - continue_on_error: true
+        service: rest_command.solismanager_clear_overrides
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.daytime_battery_release_active
+
