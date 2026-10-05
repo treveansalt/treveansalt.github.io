@@ -1,5 +1,5 @@
 # Daylight Battery Release for Home Assistant
-#
+# Written by Treveansalt
 # Adapt the entity IDs and REST command names below to your installation.
 # The amount is in kWh and is deliberately limited to the configured battery
 # capacity. The scripts are kept separate so they can also be called by an
